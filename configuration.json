@@ -1,0 +1,17 @@
+{
+  "server": {
+    "protocol": "http",
+    "host": "localhost",
+    "port": 8080,
+    "shared_space_id": 2001,
+    "workspace_id": 1002
+  },
+  "authentication_user": {
+    "username": "user",
+    "password": "password"
+  },
+  "authentication_client": {
+    "client_id": "id",
+    "client_secret": "secret"
+  }
+}
