@@ -14,7 +14,7 @@
  */
 
 var express = require('express');
-//var logger = require('morgan');
+var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
@@ -22,8 +22,9 @@ var calculator = require('./routes/calculator');
 
 var app = express();
 
-//app.use(logger('dev'));
-app.use(bodyParser.json());
+app.use(logger('combined'));
+//app.use(bodyParser.json({type:'text/plain',strict:false}));
+  app.use(bodyParser.text());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
