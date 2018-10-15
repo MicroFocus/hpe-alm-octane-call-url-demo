@@ -14,7 +14,7 @@
  * *
  * Uses the alm octane rest sdk to get phases and then update defects as needed
  */
-var Octane = require('hpe-alm-octane-js-rest-sdk');
+var Octane = require('@microfocus/alm-octane-js-rest-sdk');
 var _ = require('underscore');
 var fs = require('fs');
 var configuration = JSON.parse(fs.readFileSync('configuration.json', 'utf8'));
@@ -29,7 +29,7 @@ var authentication = configuration.authentication;
 // start initial authentication and get phases
 octane.authenticate(authentication, function(err) {
 	if (err) {
-		console.log('Error - %s', err.message);
+		console.log('Error - %s', err.message.description);
 		return
 	}
 

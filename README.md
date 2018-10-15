@@ -1,6 +1,6 @@
-# HPE ALM Octane Call URL/REST API Demo
+# Micro Focus ALM Octane Call URL/REST API Demo
 
-This project is a simple [node.js](http://nodejs.org) project that demonstrates using HPE ALM Octane's *Call URL* to call
+This project is a simple [node.js](http://nodejs.org) project that demonstrates using Micro Focus ALM Octane's *Call URL* to call
 an external system and Octane's REST API to call back and change a field with Octane.
 
 This project demonstrates how a loop can be built that enables Octane to integrate with any external system that supports
@@ -8,7 +8,7 @@ REST calls.
 
 For more information about *Call URL* and the *REST API* please see Octane's documentation.
 
-This project uses the [hpe-alm-octane-js-rest-sdk](https://github.com/HPSoftware/alm-octane-js-rest-sdk) project that enables
+This project uses the [alm-octane-js-rest-sdk](https://github.com/MicroFocus/alm-octane-js-rest-sdk) project that enables
 easy integration with REST APIs.
 
 ## Use Case
@@ -29,6 +29,7 @@ it will get the *rework_counter_udf* field from the calling *defect* and update 
         "client_secret": "secret"
       }   
     ```
+* Run `node setupconfig.js` in `scripts` directory
 * Run the server using the `node bin\www` command
 
 ## License

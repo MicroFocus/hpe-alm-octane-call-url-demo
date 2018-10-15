@@ -1,8 +1,8 @@
 {
   "server": {
     "protocol": "http",
-    "host": "myd-vm18992.hpeswlab.net",
-    "port": 25675,
+    "host": "myd-vma00236.swinfra.net",
+    "port": 8081,
     "shared_space_id": 1001,
     "workspace_id": 1002
   },
