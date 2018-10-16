@@ -18,8 +18,9 @@ var octane = require('../src/octane');
 
 /* POST endpoint for the CALLURL */
 router.post('/', function(req, res, next) {
-	var phaseChange = JSON.parse(req.body);
-	octane.parsePhaseChange(phaseChange);
+	//var phaseChange = JSON.parse(req.body);
+	// console.log ('post body: '+JSON.stringify(req.body, null, 4));
+	octane.parsePhaseChange(req.body);
 });
 
 module.exports = router;
