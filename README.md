@@ -13,10 +13,11 @@ easy integration with REST APIs.
 
 ## Use Case
 * A UDF is created for a *defect* called *rework_counter_udf*.  This field is of type number.
-* A *Trigger webhook* business rule is created for *defects*.  The rule has a condition that the *Phase* field is modified. 
+* A *Trigger webhook* business rule is created for *defects*.  The rule has a condition that the *Phase* field is modified.
  When the defect is updated the URL `server:port/calculator` resource is called
 * Using the UDF label name, add it to the Fields
-![Octane Fields](.images/octanerule.png?raw=true)
+
+![](.images/octanerule.png?raw=true)
 * This node.js server listens to that URL and if the phase was either **fixed** or **closed** and is now **opened** then
 it will get the *rework_counter_udf* field from the calling *defect* and update the number by 1
 
