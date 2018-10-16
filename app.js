@@ -24,9 +24,10 @@ var app = express();
 
 app.use(logger('combined'));
 //app.use(bodyParser.json({type:'text/plain',strict:false}));
-  app.use(bodyParser.text());
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.set('view engine','pug');
 
 app.use('/calculator', calculator);
 
