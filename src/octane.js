@@ -18,8 +18,6 @@ var Octane = require('@microfocus/alm-octane-js-rest-sdk');
 var _ = require('underscore');
 var fs = require('fs');
 var configuration = JSON.parse(fs.readFileSync('configuration.json', 'utf8'));
-var newValueRegex = /\[\[id=([\d]+).*/;
-var originalValueRegex = /.*id=([\d]+).*/;
 var defectPhases;
 
 // read configuration from file
@@ -49,59 +47,43 @@ octane.authenticate(authentication, function(err) {
 
 // called when a phase is changed
 function parsePhaseChange(changes) {
+	// console.log ('changes: '+JSON.stringify(changes, null, 4));
 	// the entity id that caused the change
-	var changeId = changes.entityId;
-	var phaseChange = changes.changes.phase;
-	// the new phase id
-	var newValueId = phaseChange.newValue.match(newValueRegex)[1];
-	// the original phase id
-	var originalValueId = phaseChange.originalValue.match(originalValueRegex)[1];
+	var changeId = changes.data[0].entity.id;
+	var phaseChange = changes.data[0].changes.phase;
 
 	// get the logical names
-	var newPhaseLogicalName = convertLogicalIdToLogicalName(newValueId);
-	var originalPhaseLogicalName = convertLogicalIdToLogicalName(originalValueId);
+	var newPhaseLogicalName = phaseChange.newValue.id;
+	var originalPhaseLogicalName = phaseChange.oldValue.id;
 
 	// in this example we only do something when the new phase is opened and the original phase was either
 	// fixed or closed
 	if (newPhaseLogicalName === 'phase.defect.opened' &&
 		(originalPhaseLogicalName === 'phase.defect.fixed' || originalPhaseLogicalName === 'phase.defect.closed' )) {
-		updateReworkCounter(changeId);
+		updateReworkCounter(changeId, changes.data[0].entity.rework_counter_udf);
 	}
 }
 
-function convertLogicalIdToLogicalName(wantedId) {
-	return _.find(defectPhases, function(defectPhase) {
-		return defectPhase.id === wantedId;
-	}).logical_name;
-}
-
 // updates a udf on octane
-function updateReworkCounter(changeId) {
+function updateReworkCounter(changeId, reworkCounter) {
 	octane.authenticate(authentication, function(err) {
 		if (err) {
 			console.log('Error - %s', err.message);
 			return
 		}
 
-		// get the defect for the change id
-		octane.defects.get({id: changeId}, function(err, defect) {
-			//console.log(defect)
+		if (reworkCounter === undefined || reworkCounter === null || reworkCounter <0) {
+			reworkCounter = 0;
+		}
 
-			// get the counter from the octane defect
-			var reworkCounter = defect.rework_counter_udf;
-			if (!reworkCounter) {
-				reworkCounter = 0;
+		// console.log ('reworkCounter: '+reworkCounter);
+		// update the counter by one
+		octane.defects.update({id: changeId, rework_counter_udf: ++reworkCounter}, function(err, defect) {
+			if (err) {
+				console.log('Error - %s', err.message);
+				return
 			}
-
-			// update the counter by one
-			octane.defects.update({id: changeId, rework_counter_udf: ++reworkCounter}, function(err, defect) {
-				if (err) {
-					console.log('Error - %s', err.message);
-					return
-				}
-
-				console.log('successfully updated rework counter');
-			});
+			console.log('successfully updated rework counter');
 		});
 	});
 }
