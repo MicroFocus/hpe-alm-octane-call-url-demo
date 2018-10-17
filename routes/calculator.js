@@ -20,7 +20,12 @@ var octane = require('../src/octane');
 router.post('/', function(req, res, next) {
 	//var phaseChange = JSON.parse(req.body);
 	// console.log ('post body: '+JSON.stringify(req.body, null, 4));
-	octane.parsePhaseChange(req.body);
+	if (req.query.test === 'true'){
+		// to send a response back for the Test Connection from Octane
+		res.status(200).send();
+	} else {
+		octane.parsePhaseChange(req.body);
+	}
 });
 
 module.exports = router;
