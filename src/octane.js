@@ -14,96 +14,67 @@
  * *
  * Uses the alm octane rest sdk to get phases and then update defects as needed
  */
-var Octane = require('@microfocus/alm-octane-js-rest-sdk');
-var _ = require('underscore');
-var fs = require('fs');
-var configuration = JSON.parse(fs.readFileSync('configuration.json', 'utf8'));
-var newValueRegex = /\[\[id=([\d]+).*/;
-var originalValueRegex = /.*id=([\d]+).*/;
-var defectPhases;
+const Octane = require('@microfocus/alm-octane-js-rest-sdk');
+const fs = require('fs');
+const configuration = JSON.parse(fs.readFileSync('configuration.json', 'utf8'));
 
 // read configuration from file
-var octane = new Octane(configuration.server);
-var authentication = configuration.authentication;
+const octane = new Octane(configuration.server);
+const authentication = configuration.authentication;
 
-// start initial authentication and get phases
-octane.authenticate(authentication, function(err) {
-	if (err) {
-		console.log('Error - %s', err.message.description);
-		return
-	}
-
-	// get phases
-	octane.phases.getAll({}, function(err, phases) {
-		if (err) {
-			console.log('Error - %s', err.message);
-			return
-		}
-
-		// get phases that are relevant to defects
-		defectPhases = _.filter(phases, function(phase) {
-			return phase.logical_name.startsWith('phase.defect');
-		});
-	});
-});
+// need to promisify octane methods in order to correctly return to the call
+const util = require('util');
+const authenticateOctane = util.promisify(octane.authenticate.bind(octane));
+const getDefects = util.promisify(octane.defects.get.bind(octane));
+const updateDefects = util.promisify(octane.defects.update.bind(octane));
 
 // called when a phase is changed
-function parsePhaseChange(changes) {
-	// the entity id that caused the change
-	var changeId = changes.entityId;
-	var phaseChange = changes.changes.phase;
-	// the new phase id
-	var newValueId = phaseChange.newValue.match(newValueRegex)[1];
-	// the original phase id
-	var originalValueId = phaseChange.originalValue.match(originalValueRegex)[1];
+function parsePhaseChange(data) {
+    return new Promise((resolve, reject) => {
+        // the entity id that caused the change
+        const changeId = data.entity.id;
+        const phaseChange = data.changes.phase;
+        // the new phase id
+        const newValueId = phaseChange.newValue.id;
+        // the original phase id
+        const originalValueId = phaseChange.oldValue.id;
 
-	// get the logical names
-	var newPhaseLogicalName = convertLogicalIdToLogicalName(newValueId);
-	var originalPhaseLogicalName = convertLogicalIdToLogicalName(originalValueId);
+        console.log('Requesting change for defect %d', changeId);
+        // in this example we only do something when the new phase is opened and the original phase was either
+        // fixed or closed
+        if (newValueId === 'phase.defect.opened' &&
+            (originalValueId === 'phase.defect.fixed' || originalValueId === 'phase.defect.closed')) {
+            updateReworkCounter(changeId).then(() => {
+                resolve();
+            }).catch(err => {
+                reject(err);
+            })
+        } else {
+            console.log('Defect %d not being changed', changeId);
+            resolve();
+        }
+    });
 
-	// in this example we only do something when the new phase is opened and the original phase was either
-	// fixed or closed
-	if (newPhaseLogicalName === 'phase.defect.opened' &&
-		(originalPhaseLogicalName === 'phase.defect.fixed' || originalPhaseLogicalName === 'phase.defect.closed' )) {
-		updateReworkCounter(changeId);
-	}
-}
-
-function convertLogicalIdToLogicalName(wantedId) {
-	return _.find(defectPhases, function(defectPhase) {
-		return defectPhase.id === wantedId;
-	}).logical_name;
 }
 
 // updates a udf on octane
 function updateReworkCounter(changeId) {
-	octane.authenticate(authentication, function(err) {
-		if (err) {
-			console.log('Error - %s', err.message);
-			return
-		}
+    return authenticateOctane(authentication).then(() => {
+        // get the defect for the change id
+        return getDefects({id: changeId, fields: 'rework_counter_udf'});
+    }).then(defect => {
+        //console.log(defect)
 
-		// get the defect for the change id
-		octane.defects.get({id: changeId}, function(err, defect) {
-			//console.log(defect)
-
-			// get the counter from the octane defect
-			var reworkCounter = defect.rework_counter_udf;
-			if (!reworkCounter) {
-				reworkCounter = 0;
-			}
-
-			// update the counter by one
-			octane.defects.update({id: changeId, rework_counter_udf: ++reworkCounter}, function(err, defect) {
-				if (err) {
-					console.log('Error - %s', err.message);
-					return
-				}
-
-				console.log('successfully updated rework counter');
-			});
-		});
-	});
+        // get the counter from the octane defect
+        let reworkCounter = defect.rework_counter_udf || 0;
+        // update the counter by one
+        return updateDefects({id: changeId, rework_counter_udf: ++reworkCounter});
+    }).then(defect => {
+        console.log('successfully updated rework counter for defect %s', defect.id);
+    }).catch(err => {
+        console.log('Error - %s', JSON.stringify(err.message));
+        throw {message: JSON.stringify(err.message), status: err.code};
+    });
 }
 
 module.exports.parsePhaseChange = parsePhaseChange;

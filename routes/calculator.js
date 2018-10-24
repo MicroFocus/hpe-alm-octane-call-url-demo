@@ -12,14 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var express = require('express');
-var router = express.Router();
-var octane = require('../src/octane');
+const express = require('express');
+const router = express.Router();
+const octane = require('../src/octane');
 
 /* POST endpoint for the CALLURL */
-router.post('/', function(req, res, next) {
-	var phaseChange = JSON.parse(req.body);
-	octane.parsePhaseChange(phaseChange);
+router.post('/', function (req, res, next) {
+    if (req.query.test) {
+        res.sendStatus(200);
+    } else {
+        octane.parsePhaseChange(req.body.data[0]).then(() => {
+            res.sendStatus(200);
+        }).catch((err) => {
+            next(err);
+        });
+    }
 });
 
 module.exports = router;
