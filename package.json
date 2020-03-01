@@ -1,6 +1,6 @@
 {
   "name": "alm-octane-call-url-demo",
-  "version": "2.0.0",
+  "version": "4.0.0",
   "description": "Example project for using Micro Focus ALM Octane's Call URL with the REST API",
   "license": "Apache-2.0",
   "repository": {
@@ -12,12 +12,11 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "@microfocus/alm-octane-js-rest-sdk": "12.60.10",
-    "underscore": "1.8.3",
-    "body-parser": "~1.17.1",
-    "cookie-parser": "~1.4.3",
-    "debug": "~2.6.3",
-    "express": "~4.15.2",
-    "morgan": "~1.8.1"
+    "@microfocus/alm-octane-js-rest-sdk": "15.0.20",
+    "body-parser": "1.19.0",
+    "cookie-parser": "1.4.4",
+    "debug": "4.1.1",
+    "express": "4.17.1",
+    "morgan": "1.9.1"
   }
 }
