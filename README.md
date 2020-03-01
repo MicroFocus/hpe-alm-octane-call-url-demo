@@ -23,20 +23,11 @@ easy integration with REST APIs.
 it will get the *rework_counter_udf* field from the calling *defect* and update the number by 1
 
 ## Installation
-* Make sure that you have at least version 8 of node.js installed
+* Make sure that you have at least version 12 of node.js installed
 * Run `npm install` on the root of the project
 * Update the *configuration.json* file in the root of the project with the correct details of the Octane server.
-  * You have a choice of using either client_id/secret authentication (recommended) or user/pass
-  * Choose one of the methods and change its key to just `authentication` for example:
-    ```
-    "authentication": {
-        "client_id": "id",
-        "client_secret": "secret"
-      }   
-    ```
-* Run `node setupconfig.js` in `scripts` directory.  You should do this *after* creating the UDF in Octane so that the
-sdk picks up the UDF and is able to use it
-* Run the server using the `node bin\www` command
+  * You have a choice of using either client_id/secret authentication (recommended) or user/pass  
+* Run the server using the `node bin/www` command
 
 ## License
 Apache 2.0
